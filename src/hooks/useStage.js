@@ -7,7 +7,7 @@ export const useStage = (player, resetPlayer) => {
 
   useEffect(() => {
     const updateStage = (prevStage) => {
-      // creating new stage from the prev stage
+      // creating new stage with the updated position of tetrominos
       const newStage = prevStage.map((row) =>
         // clearing the stage from the prev render if the cell has "clear" value
         // if the cell has a tetromino that collided with another tetromino then return the cell
@@ -28,12 +28,17 @@ export const useStage = (player, resetPlayer) => {
         });
       });
 
+      // if player collided with another tetromino then create new tetromino by reseting the player
+      if (player.collided) {
+        resetPlayer();
+      }
+
       return newStage;
     };
 
     // setting the stage state
     setStage((prev) => updateStage(prev));
-  }, [player]);
+  }, [player, resetPlayer]);
 
   // returning the stage to Tetris component
   return [stage, setStage];
