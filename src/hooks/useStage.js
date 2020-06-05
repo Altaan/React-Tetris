@@ -4,8 +4,24 @@ import { createStage } from "../gameHelpers";
 
 export const useStage = (player, resetPlayer) => {
   const [stage, setStage] = useState(createStage());
+  const [rowsCleared, setRowsCleared] = useState(0);
 
   useEffect(() => {
+    setRowsCleared(0);
+
+    const sweepRows = (newStage) =>
+      newStage.reduce((acc, row) => {
+        // if there are no cells that have 0 then this is a full row
+        if (row.findIndex((cell) => cell[0] === 0) === -1) {
+          setRowsCleared((prev) => prev + 1);
+          // adding new row at the top of the stage
+          acc.unshift(new Array(newStage[0].length).fill([0, "clear"]));
+          return acc;
+        }
+        acc.push(row);
+        return acc;
+      }, []);
+
     const updateStage = (prevStage) => {
       // creating new stage with the updated position of tetrominos
       const newStage = prevStage.map((row) =>
@@ -31,6 +47,8 @@ export const useStage = (player, resetPlayer) => {
       // if player collided with another tetromino then create new tetromino by reseting the player
       if (player.collided) {
         resetPlayer();
+        // check and remove any full rows in the stage
+        return sweepRows(newStage);
       }
 
       return newStage;
@@ -41,5 +59,5 @@ export const useStage = (player, resetPlayer) => {
   }, [player, resetPlayer]);
 
   // returning the stage to Tetris component
-  return [stage, setStage];
+  return [stage, setStage, rowsCleared];
 };
